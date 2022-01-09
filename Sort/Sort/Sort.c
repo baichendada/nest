@@ -1,5 +1,6 @@
 # define _CRT_SECURE_NO_WARNINGS
 #include "Sort.h"
+#include "Stack.h"
 
 void ArrayPrint(int* a, int n)
 {
@@ -295,12 +296,145 @@ int PartSort2(int* a, int left, int right)
 	return left;
 }
 
+int PartSort3(int* a, int left, int right)
+{
+	assert(a);
+	// 三数取中
+	int mid = SelectMid(a, left, right);
+	Swap(&a[left], &a[mid]);
+
+	// prev从最左开始，cur开始从比prev+1的位置开始
+	int keyi = left;
+	int prev = left;
+	int cur = prev + 1;
+
+	while (cur <= right)
+	{
+		// 找小，如果++prev后值与cur相同，为了防止无效调用Swap，所以不进入if内
+		if (a[cur] < a[keyi] && ++prev != cur)
+		{
+			Swap(&a[cur], &a[prev]);
+		}
+		++cur;
+	}
+	Swap(&a[keyi], &a[prev]);
+	
+	return prev;
+}
+
 void QuickSort(int* a, int left, int right)
 {
 	if (left >= right)
 		return;
 
-	int key = PartSort2(a, left, right);
+	int key = PartSort3(a, left, right);
 	QuickSort(a, left, key - 1);
 	QuickSort(a, key + 1, right);
+}
+
+
+// 防止递归深度过深
+void QuickSortNonR(int* a, int left, int right)
+{
+	ST Stack;
+	StackInit(&Stack);
+	// 利用栈结构的先进后出的特性实现模拟栈，我们要入栈left和right
+	StackPush(&Stack, left);
+	StackPush(&Stack, right);
+
+	// 当栈为空时，证明所有元素已经完成出栈（递归结束），循环结束
+	while (!StackEmpty(&Stack))
+	{
+		// 出栈元素
+		int end = StackTop(&Stack);
+		StackPop(&Stack);
+
+		int begin = StackTop(&Stack);
+		StackPop(&Stack);
+
+		int key = PartSort3(a, begin, end);
+
+		// 入栈元素，为下一次递归做准备，因为要模拟栈的调用顺序，所以对入栈的顺序有要求
+		// 我们如果要先完成左边元素的排序，就得先入栈右元素相关数据
+
+		// 当右边大于一个元素时，入栈
+		if (key + 1 < end)
+		{
+			StackPush(&Stack, key + 1);
+			StackPush(&Stack, end);
+		}
+		
+		//同理，当左边元素大于一个时，入栈
+		if (key - 1 > begin)
+		{
+			StackPush(&Stack, begin);
+			StackPush(&Stack, key - 1);
+		}
+	}
+	StackDestroy(&Stack);
+}
+
+void _MergeSort(int* a, int left, int right, int* tmp)
+{
+	// 当分的只剩一个元素时，返回，开始排序。
+	if (left >= right)
+		return;
+	
+	// 找中间
+	int mid = left + ((right - left) >> 1);
+
+	// 完成左右的归并排序
+	_MergeSort(a, left, mid, tmp);
+	_MergeSort(a, mid + 1, right, tmp);
+
+	// 完成左右的排序，现在就可以将左右看作两个数组，开始排序
+	int begin1 = left, end1 = mid;
+	int begin2 = mid + 1, end2 = right;
+	// 这里的i是开始的位置要与被排列的数组的left相同，保证拷贝到相同位置
+	int i = left;
+
+	// 开始排序，将排序结果先放到开辟的空间中
+	while (begin1 <= end1 && begin2 <= end2)
+	{
+		if (a[begin1] < a[begin2])
+		{
+			tmp[i] = a[begin1++];
+		}
+		else
+		{
+			tmp[i] = a[begin2++];
+		}
+		++i;
+	}
+	// 将未放完的数组直接放到tmp中
+	while (begin1 <= end1)
+	{
+		tmp[i++] = a[begin1++];
+	}
+
+	while (begin2 <= end2)
+	{
+		tmp[i++] = a[begin2++];
+	}
+
+	// 将tmp的排序结果copy到原数组
+	for (int j = left; j <= right; j++)
+	{
+		a[j] = tmp[j];
+	}
+}
+
+void MergeSort(int* a, int n)
+{
+	assert(a);
+	assert(n > 0);
+
+	int* tmp = (int*)malloc(sizeof(int) * n);
+	if (tmp == NULL)
+	{
+		printf("malloc fail\n");
+		exit(-1);
+	}
+
+	_MergeSort(a, 0, n - 1, tmp);
 }

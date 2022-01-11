@@ -327,9 +327,17 @@ void QuickSort(int* a, int left, int right)
 	if (left >= right)
 		return;
 
-	int key = PartSort3(a, left, right);
-	QuickSort(a, left, key - 1);
-	QuickSort(a, key + 1, right);
+	// 小区间优化,数据小于十个时，不再递归，直接插入排序
+	if (right - left + 1 < 10)
+	{
+		InsertSort(a + left, right - left + 1);
+	}
+	else
+	{
+		int key = PartSort3(a, left, right);
+		QuickSort(a, left, key - 1);
+		QuickSort(a, key + 1, right);
+	}
 }
 
 
@@ -352,23 +360,32 @@ void QuickSortNonR(int* a, int left, int right)
 		int begin = StackTop(&Stack);
 		StackPop(&Stack);
 
-		int key = PartSort3(a, begin, end);
+		// 小区间优化
 
-		// 入栈元素，为下一次递归做准备，因为要模拟栈的调用顺序，所以对入栈的顺序有要求
-		// 我们如果要先完成左边元素的排序，就得先入栈右元素相关数据
-
-		// 当右边大于一个元素时，入栈
-		if (key + 1 < end)
+		if (right - left + 1 < 10)
 		{
-			StackPush(&Stack, key + 1);
-			StackPush(&Stack, end);
+			InsertSort(a + left, right - left + 1);
 		}
-		
-		//同理，当左边元素大于一个时，入栈
-		if (key - 1 > begin)
+		else
 		{
-			StackPush(&Stack, begin);
-			StackPush(&Stack, key - 1);
+			int key = PartSort3(a, begin, end);
+
+			// 入栈元素，为下一次递归做准备，因为要模拟栈的调用顺序，所以对入栈的顺序有要求
+			// 我们如果要先完成左边元素的排序，就得先入栈右元素相关数据
+
+			// 当右边大于一个元素时，入栈
+			if (key + 1 < end)
+			{
+				StackPush(&Stack, key + 1);
+				StackPush(&Stack, end);
+			}
+
+			//同理，当左边元素大于一个时，入栈
+			if (key - 1 > begin)
+			{
+				StackPush(&Stack, begin);
+				StackPush(&Stack, key - 1);
+			}
 		}
 	}
 	StackDestroy(&Stack);
@@ -438,3 +455,208 @@ void MergeSort(int* a, int n)
 
 	_MergeSort(a, 0, n - 1, tmp);
 }
+
+// 1.修正版
+//void MergeSortNonR(int* a, int n)
+//{
+//	assert(a);
+//	assert(n > 0);
+//	// 开辟一块空间，存放排好序的数组
+//	int* tmp = (int*)malloc(sizeof(int) * n);
+//	if (tmp == NULL)
+//	{
+//		printf("malloc fail\n");
+//		exit(-1);
+//	}
+//
+//	int gap = 1;
+//
+//	while(gap < n)
+//	{
+//		for (int i = 0; i < n; i += 2 * gap)
+//		{
+//			int begin1 = i, end1 = i + gap - 1;
+//			int begin2 = i + gap, end2 = i + 2 * gap - 1;
+//			int j = i;
+//
+//			// 当end1就大于等于n时
+//			if (end1 >= n)
+//			{
+//				end1 = n - 1;
+//			}
+//
+//			// 当begin2大于等于n时，第二组可以不用排了，直接让begin2>end2
+//			if (begin2 >= n)
+//			{
+//				begin2 = n;
+//				end2 = n - 1;
+//			}
+//
+//			// end2大于等于0，说明第二组可能还有数要排
+//			if (end2 >= n)
+//			{
+//				end2 = n - 1;
+//			}
+//
+//			while (begin1 <= end1 && begin2 <= end2)
+//			{
+//				if (a[begin1] < a[begin2])
+//				{
+//					tmp[j++] = a[begin1++];
+//				}
+//				else
+//				{
+//					tmp[j++] = a[begin2++];
+//				}
+//			}
+//
+//			while (begin1 <= end1)
+//			{
+//				tmp[j++] = a[begin1++];
+//			}
+//
+//			while (begin2 <= end2)
+//			{
+//				tmp[j++] = a[begin2++];
+//			}
+//
+//		}
+//
+//		// 相当于把层序遍历，把一层遍历完再拷贝回去
+//		for (int i = 0; i < n; i++)
+//		{
+//			a[i] = tmp[i];
+//		}
+//
+//		gap *= 2;
+//	}
+//	
+//	free(tmp);
+//	tmp = NULL;
+//}
+
+// 2.模拟递归版
+void MergeSortNonR(int* a, int n)
+{
+	assert(a);
+	assert(n > 0);
+	// 开辟一块空间，存放排好序的数组
+	int* tmp = (int*)malloc(sizeof(int) * n);
+	if (tmp == NULL)
+	{
+		printf("malloc fail\n");
+		exit(-1);
+	}
+
+	int gap = 1;
+
+	while (gap < n)
+	{
+		for (int i = 0; i < n; i += 2 * gap)
+		{
+			int begin1 = i, end1 = i + gap - 1;
+			int begin2 = i + gap, end2 = i + 2 * gap - 1;
+			int j = i;
+
+			// 当end1大于等于n或者begin2大于等于n时，代表这次不用排序了
+			if (end1 >= n || begin2 >= n)
+			{
+				break;
+			}
+
+			// 只有end2越界时，要修正排序
+			if (end2 >= n)
+			{
+				end2 = n - 1;
+			}
+
+			while (begin1 <= end1 && begin2 <= end2)
+			{
+				if (a[begin1] < a[begin2])
+				{
+					tmp[j++] = a[begin1++];
+				}
+				else
+				{
+					tmp[j++] = a[begin2++];
+				}
+			}
+
+			while (begin1 <= end1)
+			{
+				tmp[j++] = a[begin1++];
+			}
+
+			while (begin2 <= end2)
+			{
+				tmp[j++] = a[begin2++];
+			}
+
+			// 排完序直接拷贝,这次要控制复制的边界
+			for (int k = i; k <= end2; k++)
+			{
+				a[k] = tmp[k];
+			}
+		}
+		
+
+		gap *= 2;
+	}
+
+	free(tmp);
+	tmp = NULL;
+}
+
+
+
+void CountSort(int* a, int n)
+{
+	assert(a);
+	assert(n > 0);
+
+	int max = a[0];
+	int min = a[0];
+
+	// 选出最大值，最小值
+	for (int i = 1; i < n; i++)
+	{
+		if (a[i] > max)
+		{
+			max = a[i];
+		}
+
+		if (a[i] < min)
+		{
+			min = a[i];
+		}
+	}
+
+	int range = max - min + 1;
+
+	int* count = (int*)calloc(range , sizeof(int));
+	if (count == NULL)
+	{
+		printf("malloc fail\n");
+		exit(-1);
+	}
+	
+	
+	//  这里统计数组中各个数字出现的次数
+	for (int i = 0; i < n; i++)
+	{
+		count[a[i] - min]++;
+	}
+
+	int j = 0;
+
+	// 将出现的数字，放回数组
+	for (int i = 0; i < range; i++)
+	{
+		while (count[i]--)
+		{
+			a[j++] = i + min;
+		}
+	}
+
+}
+

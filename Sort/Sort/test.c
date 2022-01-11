@@ -131,6 +131,38 @@ void test8()
 	ArrayPrint(a, 100);
 }
 
+void test9()
+{
+	int a[100] = { 10,9,8,7,6,5,4,3,2,1 };
+
+	for (int i = 0; i < 100; i++)
+	{
+		a[i] = rand();
+	}
+
+	ArrayPrint(a, 100);
+
+	MergeSortNonR(a, 100);
+
+	ArrayPrint(a, 100);
+}
+
+void test10()
+{
+	int a[10] = { 10,9,8,7,6,5,4,3,2,1 };
+
+	for (int i = 0; i < 10; i++)
+	{
+		a[i] = rand();
+	}
+
+	ArrayPrint(a, 10);
+
+	CountSort(a, 10);
+
+	ArrayPrint(a, 10);
+}
+
 void TestOP()
 {
 	const int N = 10000000;
@@ -150,6 +182,7 @@ void TestOP()
 		a4[i] = a1[i];
 		a5[i] = a1[i];
 		a6[i] = a1[i];
+		a7[i] = a1[i];
 	}
 
 	int begin1 = clock();
@@ -173,8 +206,12 @@ void TestOP()
 	int end5 = clock();
 
 	int begin6 = clock();
-	MergeSort(a6, N);
+	MergeSortNonR(a6, N);
 	int end6 = clock();
+
+	int begin7 = clock();
+	CountSort(a7, N);
+	int end7 = clock();
 
 	printf("InsertSort:%d\n", end1 - begin1);
 	printf("ShellSort:%d\n", end2 - begin2);
@@ -182,6 +219,7 @@ void TestOP()
 	printf("HeapSort:%d\n", end4 - begin4);
 	printf("QuickSort:%d\n", end5 - begin5);
 	printf("MergeSort:%d\n", end6 - begin6);
+	printf("CountSort:%d\n", end7 - begin7);
 
 	free(a1);
 	free(a2);
@@ -189,6 +227,7 @@ void TestOP()
 	free(a4);
 	free(a5);
 	free(a6);
+	free(a7);
 }
 
 
@@ -206,6 +245,10 @@ int main()
 	//test6();
 	//test7();
 	//test8();
+	//test9();
+	//test10();
 
 	return 0;
 }
+
+

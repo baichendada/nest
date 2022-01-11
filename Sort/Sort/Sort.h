@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <assert.h>
+#include <string.h>
 
 // 数组打印
 void ArrayPrint(int* a, int n);
@@ -39,3 +40,8 @@ void QuickSortNonR(int* a, int left, int right);
 // 归并排序
 void MergeSort(int* a, int n);
 
+// 归并排序非递归实现
+void MergeSortNonR(int* a, int n);
+
+// 计数排序
+void CountSort(int* a, int n);

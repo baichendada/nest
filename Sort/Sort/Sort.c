@@ -660,3 +660,164 @@ void CountSort(int* a, int n)
 
 }
 
+void _MergeFile(const char* file1, const char* file2, const char* fileSum)
+{
+	FILE* file_1 = fopen(file1, "r");
+	if (file_1 == NULL)
+	{
+		perror("file_1");
+		exit(-1);
+	}
+
+	FILE* file_2 = fopen(file2, "r");
+	if (file_2 == NULL)
+	{
+		perror("file_2");
+		exit(-1);
+	}
+
+	FILE* file_sum = fopen(fileSum, "w");
+	if (file_sum == NULL)
+	{
+		perror("file_sum");
+		exit(-1);
+	}
+	int num1, num2;
+	int ret1 = fscanf(file_1, "%d\n", &num1);
+	int ret2 = fscanf(file_2, "%d\n", &num2);
+
+	while (ret1 != EOF && ret2 != EOF)
+	{
+		if (num1 < num2)
+		{
+			fprintf(file_sum, "%d\n", num1);
+			ret1 = fscanf(file_1, "%d\n", &num1);
+		}
+		else
+		{
+			fprintf(file_sum, "%d\n", num2);
+			ret2 = fscanf(file_2, "%d\n", &num2);
+		}
+	}
+
+	while (ret1 != EOF)
+	{
+		fprintf(file_sum, "%d\n", num1);
+		ret1 = fscanf(file_1, "%d\n", &num1);
+	}
+
+	while (ret2 != EOF)
+	{
+		fprintf(file_sum, "%d\n", num2);
+		ret2 = fscanf(file_2, "%d\n", &num2);
+	}
+
+	fclose(file_1);
+	fclose(file_2);
+	fclose(file_sum);
+}
+
+// 外部排序，传递的参数是文件路径加文件名
+void MergeFile(const char* file)
+{
+	FILE* fout = fopen(file, "r");
+	if (fout == NULL)
+	{
+		perror("fout");
+		exit(-1);
+	}
+
+	int n = 100000;// 假设在内存中加载十个，一次排十个
+	int* a = (int*)malloc(sizeof(int) * n);
+	int i = 0;// 下标
+	int num = 0;// 存放读取的数据
+	int filei = 1;// 用来给文件起名字
+	char fileName[100] = { 0 };// 用来放文件名称
+
+	// 从文件中开始读数据，注意读取的格式
+	while (~fscanf(fout, "%d\n", &num))
+	{
+		if (i < n - 1)
+		{
+			a[i++] = num;
+		}
+		else
+		{
+			// 读到最后一个数据
+			a[i] = num;
+			QuickSort(a, 0, n - 1);
+			// 将数据读取到文件中，这里我们默认保存到本目录下
+			sprintf(fileName, "little%d", filei++);
+			FILE* fin = fopen(fileName, "w");
+			if (fin == NULL)
+			{
+				perror("fin");
+				exit(-1);
+			}
+
+			for (int j = 0; j < n; j++)
+			{
+				fprintf(fin, "%d\n", a[j]);
+			}
+
+			fclose(fin);
+			i = 0;
+		}
+	}
+
+	// 排序那些最后剩余的数据
+	int flag = 0;
+	if (i != 0)
+	{
+		flag = 1;
+		QuickSort(a, 0, i - 1);
+
+		sprintf(fileName, "little%d", filei);
+
+		FILE* fin = fopen(fileName, "w");
+		if (fin == NULL)
+		{
+			perror("fin");
+			exit(-1);
+		}
+
+		for (int j = 0; j < i; j++)
+		{
+			fprintf(fin, "%d\n", a[j]);
+		}
+
+		fclose(fin);
+	}
+
+	int j = 1;
+
+	char fileCall_1[100] = "little1";
+	char fileCall_2[100] = "little2";
+	char fileFinal[100] = "little1_little2";
+
+	// 如果有剩余数据，就循环filei+1，否则只需循环file次
+	if (flag == 0)
+	{
+		for (j = 3; j <= filei; j++)
+		{
+			_MergeFile(fileCall_1, fileCall_2, fileFinal);
+			strcpy(fileCall_1, fileFinal);
+			sprintf(fileFinal, "%s_little%d", fileFinal, j);
+			sprintf(fileCall_2, "little%d", j);
+		}
+	}
+	else
+	{
+		for (j = 3; j <= filei + 1; j++)
+		{
+			_MergeFile(fileCall_1, fileCall_2, fileFinal);
+			strcpy(fileCall_1, fileFinal);
+			sprintf(fileFinal, "%s_little%d", fileFinal, j);
+			sprintf(fileCall_2, "little%d", j);
+		}
+	}
+	
+
+	fclose(fout);
+	free(a);
+}

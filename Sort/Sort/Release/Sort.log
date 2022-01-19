@@ -1,7 +1,10 @@
 ﻿  Sort.c
+  Stack.c
+  test.c
+C:\Users\李若尘\Desktop\办公系\nest\Sort\Sort\test.c(237,18): warning C4244: “函数”: 从“time_t”转换到“unsigned int”，可能丢失数据
   正在生成代码
-  1 of 20 functions ( 5.0%) were compiled, the rest were copied from previous compilation.
+  16 of 18 functions (88.9%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
+    0 functions had inline decision re-evaluated but remain unchanged
   已完成代码的生成
-  Sort.vcxproj -> D:\Git\my-nest\Sort\Release\Sort.exe
+  Sort.vcxproj -> C:\Users\李若尘\Desktop\办公系\nest\Sort\Release\Sort.exe

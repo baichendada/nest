@@ -1,3 +1,5 @@
-﻿  test.c
+﻿  Sort.c
+  test.c
 D:\Git\my-nest\Sort\Sort\test.c(237,18): warning C4244: “函数”: 从“time_t”转换到“unsigned int”，可能丢失数据
+  正在生成代码...
   Sort.vcxproj -> D:\Git\my-nest\Sort\Debug\Sort.exe

@@ -239,7 +239,7 @@ int main()
 	//test2();
 	//test3();
 	//test4();
-	TestOP();
+	//TestOP();
 
 	//test5();
 	//test6();
@@ -247,6 +247,18 @@ int main()
 	//test8();
 	//test9();
 	//test10();
+
+
+	FILE* file = fopen("sort", "w");
+
+	for (int i = 0; i < 1000004; i++)
+	{
+		fprintf(file, "%d\n", rand());
+	}
+
+	fclose(file);
+
+	MergeFile("sort");
 
 	return 0;
 }

@@ -1,0 +1,3 @@
+﻿  test.c
+D:\Git\my-nest\test_2022_1_20_bit_8\test_2022_1_20_bit_8\test.c(50,16): warning C4013: “gets”未定义；假设外部返回 int
+  test_2022_1_20_bit_8.vcxproj -> D:\Git\my-nest\test_2022_1_20_bit_8\Debug\test_2022_1_20_bit_8.exe
